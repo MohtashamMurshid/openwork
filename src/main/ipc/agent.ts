@@ -27,8 +27,24 @@ export function registerAgentHandlers(ipcMain: IpcMain): void {
         return
       }
 
+      // Abort any existing stream for this thread before starting a new one
+      // This prevents concurrent streams which can cause checkpoint corruption
+      const existingController = activeRuns.get(threadId)
+      if (existingController) {
+        console.log('[Agent] Aborting existing stream for thread:', threadId)
+        existingController.abort()
+        activeRuns.delete(threadId)
+      }
+
       const abortController = new AbortController()
       activeRuns.set(threadId, abortController)
+
+      // Abort the stream if the window is closed/destroyed
+      const onWindowClosed = (): void => {
+        console.log('[Agent] Window closed, aborting stream for thread:', threadId)
+        abortController.abort()
+      }
+      window.once('closed', onWindowClosed)
 
       try {
         // Get workspace path from thread metadata
@@ -78,6 +94,7 @@ export function registerAgentHandlers(ipcMain: IpcMain): void {
           error: error instanceof Error ? error.message : 'Unknown error'
         })
       } finally {
+        window.removeListener('closed', onWindowClosed)
         activeRuns.delete(threadId)
       }
     }

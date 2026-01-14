@@ -107,7 +107,7 @@ function App(): React.JSX.Element {
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-background">
+    <div className="flex h-screen overflow-hidden bg-background">
       {/* Fixed app badge - zoom independent position and size */}
       <div
         className="app-badge"
@@ -124,52 +124,49 @@ function App(): React.JSX.Element {
         <span className="app-badge-version">{__APP_VERSION__}</span>
       </div>
 
-      {/* Titlebar row with tabs integrated */}
-      <div className="flex h-9 w-full shrink-0 app-drag-region bg-sidebar">
-        {/* Left section - spacer for traffic lights + badge (matches left sidebar width) */}
-        <div style={{ width: leftWidth }} className="shrink-0" />
+      {/* Left + Center column */}
+      <div className="flex flex-col flex-1 min-w-0">
+        {/* Titlebar row with tabs integrated */}
+        <div className="flex h-9 w-full shrink-0 app-drag-region bg-sidebar">
+          {/* Left section - spacer for traffic lights + badge (matches left sidebar width) */}
+          <div style={{ width: leftWidth }} className="shrink-0" />
 
-        {/* Resize handle spacer */}
-        <div className="w-[1px] shrink-0" />
+          {/* Resize handle spacer */}
+          <div className="w-[1px] shrink-0" />
 
-        {/* Center section - Tab bar */}
-        <div className="flex-1 min-w-0">
-          {currentThreadId && <TabBar className="h-full border-b-0" />}
+          {/* Center section - Tab bar */}
+          <div className="flex-1 min-w-0">
+            {currentThreadId && <TabBar className="h-full border-b-0" />}
+          </div>
         </div>
 
-        {/* Resize handle spacer */}
-        <div className="w-[1px] shrink-0" />
+        {/* Main content area */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Left Sidebar - Thread List */}
+          <div style={{ width: leftWidth }} className="shrink-0">
+            <ThreadSidebar />
+          </div>
 
-        {/* Right section spacer (matches right panel width) */}
-        <div style={{ width: rightWidth }} className="shrink-0" />
+          <ResizeHandle onDrag={handleLeftResize} />
+
+          {/* Center - Content Panel (Agent Chat + File Viewer) */}
+          <main className="flex flex-1 flex-col min-w-0 overflow-hidden">
+            {currentThreadId ? (
+              <TabbedPanel threadId={currentThreadId} showTabBar={false} />
+            ) : (
+              <div className="flex flex-1 items-center justify-center text-muted-foreground">
+                Select or create a thread to begin
+              </div>
+            )}
+          </main>
+        </div>
       </div>
 
-      {/* Main content area */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar - Thread List */}
-        <div style={{ width: leftWidth }} className="shrink-0">
-          <ThreadSidebar />
-        </div>
+      <ResizeHandle onDrag={handleRightResize} />
 
-        <ResizeHandle onDrag={handleLeftResize} />
-
-        {/* Center - Content Panel (Agent Chat + File Viewer) */}
-        <main className="flex flex-1 flex-col min-w-0 overflow-hidden">
-          {currentThreadId ? (
-            <TabbedPanel threadId={currentThreadId} showTabBar={false} />
-          ) : (
-            <div className="flex flex-1 items-center justify-center text-muted-foreground">
-              Select or create a thread to begin
-            </div>
-          )}
-        </main>
-
-        <ResizeHandle onDrag={handleRightResize} />
-
-        {/* Right Panel - Status Panels */}
-        <div style={{ width: rightWidth }} className="shrink-0">
-          <RightPanel />
-        </div>
+      {/* Right Panel - Status Panels (full height) */}
+      <div style={{ width: rightWidth }} className="shrink-0">
+        <RightPanel />
       </div>
     </div>
   )
